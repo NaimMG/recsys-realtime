@@ -1,0 +1,12 @@
+# CI/CD pipeline - will be configured in Phase 8
+name: ci-cd
+
+on:
+  workflow_dispatch:
+
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: placeholder
+        run: echo "Pipeline not configured yet"
