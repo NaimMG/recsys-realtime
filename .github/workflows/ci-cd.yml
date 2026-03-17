@@ -1,12 +1,59 @@
-# CI/CD pipeline - will be configured in Phase 8
 name: ci-cd
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
+env:
+  ACR_LOGIN_SERVER: recsysregistry.azurecr.io
+  IMAGE_NAME: recsys-api
+
 jobs:
-  placeholder:
+  build-and-push:
     runs-on: ubuntu-latest
+
     steps:
-      - name: placeholder
-        run: echo "Pipeline not configured yet"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: recsysregistry.azurecr.io
+          username: recsysregistry
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/api
+          push: true
+          tags: |
+            recsysregistry.azurecr.io/recsys-api:latest
+            recsysregistry.azurecr.io/recsys-api:${{ github.sha }}
+
+      - name: Build and push Producer image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/producer
+          push: true
+          tags: |
+            recsysregistry.azurecr.io/recsys-producer:latest
+            recsysregistry.azurecr.io/recsys-producer:${{ github.sha }}
+
+      - name: Build and push Consumer image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/consumer
+          push: true
+          tags: |
+            recsysregistry.azurecr.io/recsys-consumer:latest
+            recsysregistry.azurecr.io/recsys-consumer:${{ github.sha }}
+
+      - name: Summary
+        run: |
+          echo "✅ Images pushées sur ACR"
+          echo "API: recsysregistry.azurecr.io/recsys-api:${{ github.sha }}"
+          echo "Producer: recsysregistry.azurecr.io/recsys-producer:${{ github.sha }}"
+          echo "Consumer: recsysregistry.azurecr.io/recsys-consumer:${{ github.sha }}"
