@@ -62,6 +62,7 @@ L'API est déployée et accessible publiquement :
 ```bash
 curl http://51.103.26.118:8000/recommend/257597
 ```
+> ⚠️ La VM Azure est désallouée pour économiser les crédits.
 
 ### Réponse
 ```json
