@@ -97,3 +97,43 @@ print(f"Recall@{K}     : {np.mean(recalls):.4f}")
 print(f"NDCG@{K}       : {np.mean(ndcgs):.4f}")
 print("="*40)
 print(f"\n✅ Évaluation terminée sur {len(precisions)} utilisateurs")
+
+# ── 7. Baseline popularité ───────────────────────────────────────────────
+print("\n📊 Calcul baseline popularité @10...")
+
+popular_items = (
+    train_df["itemid"]
+    .value_counts()
+    .head(K)
+    .index.tolist()
+)
+
+base_precisions, base_recalls, base_ndcgs = [], [], []
+
+for user_id in sample_users:
+    true_items = test_user_items.get(user_id, set())
+    if not true_items:
+        continue
+
+    hits = len(set(popular_items) & true_items)
+    base_precisions.append(hits / K)
+    base_recalls.append(hits / len(true_items) if true_items else 0)
+
+    dcg = sum(
+        1 / np.log2(i + 2)
+        for i, item in enumerate(popular_items)
+        if item in true_items
+    )
+    ideal_hits = min(len(true_items), K)
+    idcg = sum(1 / np.log2(i + 2) for i in range(ideal_hits))
+    base_ndcgs.append(dcg / idcg if idcg > 0 else 0)
+
+print("\n" + "="*40)
+print(f"📈 COMPARAISON ALS vs POPULARITÉ @{K}")
+print("="*40)
+print(f"{'Métrique':<15} {'ALS':>10} {'Popularité':>12} {'Gain':>8}")
+print("-"*40)
+print(f"{'Precision@10':<15} {np.mean(precisions):>10.4f} {np.mean(base_precisions):>12.4f} {np.mean(precisions)/max(np.mean(base_precisions),1e-9):>7.1f}x")
+print(f"{'Recall@10':<15} {np.mean(recalls):>10.4f} {np.mean(base_recalls):>12.4f} {np.mean(recalls)/max(np.mean(base_recalls),1e-9):>7.1f}x")
+print(f"{'NDCG@10':<15} {np.mean(ndcgs):>10.4f} {np.mean(base_ndcgs):>12.4f} {np.mean(ndcgs)/max(np.mean(base_ndcgs),1e-9):>7.1f}x")
+print("="*40)
