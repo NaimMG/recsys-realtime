@@ -125,3 +125,36 @@ def recommend(user_id: int, n: int = TOP_N):
 @app.get("/metrics")
 def metrics():
     return Response(generate_latest(), media_type="text/plain")
+
+@app.get("/similar/{item_id}")
+def similar(item_id: int, n: int = TOP_N):
+    start = time.time()
+
+    item_to_idx = artifacts["item_to_idx"]
+    item_ids = artifacts["item_ids"]
+    item_embeddings = artifacts["model"].item_factors
+
+    if item_id not in item_to_idx:
+        raise HTTPException(status_code=404, detail=f"Item {item_id} non trouvé dans le modèle")
+
+    idx = item_to_idx[item_id]
+    item_vec = item_embeddings[idx]
+
+    # Recherche de similarité cosine
+    item_vec = item_vec / (np.linalg.norm(item_vec) + 1e-9)
+    norms = np.linalg.norm(item_embeddings, axis=1, keepdims=True) + 1e-9
+    normalized = item_embeddings / norms
+    scores = normalized @ item_vec
+    scores[idx] = -1  # exclure l'item lui-même
+
+    top_indices = np.argpartition(scores, -n)[-n:]
+    top_indices = top_indices[np.argsort(scores[top_indices])[::-1]]
+
+    similar_items = [int(item_ids[i]) for i in top_indices]
+    latency = round((time.time() - start) * 1000, 2)
+
+    return {
+        "item_id": item_id,
+        "similar_items": similar_items,
+        "latency_ms": latency
+    }
