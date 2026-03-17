@@ -73,6 +73,21 @@ curl http://51.103.26.118:8000/recommend/257597
 }
 ```
 
+## 🧪 Validation du modèle
+
+Évaluation sur split temporel 80/20 (train jusqu'au 2015-08-18, test après).
+
+### Résultats @10
+
+| Métrique | ALS | Baseline Popularité | Gain |
+|---|---|---|---|
+| Precision@10 | 0.0562 | 0.0020 | **28x** |
+| Recall@10 | 0.1879 | 0.0065 | **29x** |
+| NDCG@10 | 0.1667 | 0.0046 | **36x** |
+
+Évaluation sur 500 utilisateurs du test set avec split temporel strict
+(pas de data leakage).
+
 ## 📊 Métriques
 
 - Latence p50 : < 20ms
