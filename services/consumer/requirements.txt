@@ -1,0 +1,4 @@
+azure-eventhub==5.11.4
+azure-storage-blob==12.19.0
+redis==5.0.1
+numpy==1.26.4
