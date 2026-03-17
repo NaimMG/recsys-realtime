@@ -88,8 +88,21 @@ curl http://51.103.26.118:8000/recommend/257597
 Évaluation sur 500 utilisateurs du test set avec split temporel strict
 (pas de data leakage).
 
-## 📊 Métriques
+## 📊 Métriques de performance
 
-- Latence p50 : < 20ms
-- Latence p99 : < 50ms
-- Throughput : > 1000 req/sec
+### Latence API (200 requêtes, utilisateurs aléatoires)
+
+| Percentile | Latence |
+|---|---|
+| p50 | 8.6ms |
+| p90 | 39.5ms |
+| p99 | 58.8ms |
+| max | 71.7ms |
+
+### Modèle ALS vs Baseline Popularité @10
+
+| Métrique | ALS | Popularité | Gain |
+|---|---|---|---|
+| Precision@10 | 0.0562 | 0.0020 | **28x** |
+| Recall@10 | 0.1879 | 0.0065 | **29x** |
+| NDCG@10 | 0.1667 | 0.0046 | **36x** |
